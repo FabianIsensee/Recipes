@@ -47,6 +47,12 @@ def center_crop_generator(generator, output_size):
         center = np.array(data.shape[2:])/2
         yield data[:, :, int(center[0]-center_crop[0]/2.):int(center[0]+center_crop[0]/2.), int(center[1]-center_crop[1]/2.):int(center[1]+center_crop[1]/2.)], seg[:, :, int(center[0]-center_crop[0]/2.):int(center[0]+center_crop[0]/2.), int(center[1]-center_crop[1]/2.):int(center[1]+center_crop[1]/2.)]
 
+def center_crop_seg_generator(generator, output_size):
+    center_crop = lasagne.utils.as_tuple(output_size, 2, int)
+    for data, seg in generator:
+        center = np.array(data.shape[2:])/2
+        yield data, seg[:, :, int(center[0]-center_crop[0]/2.):int(center[0]+center_crop[0]/2.), int(center[1]-center_crop[1]/2.):int(center[1]+center_crop[1]/2.)]
+
 
 def random_crop_generator(generator, crop_size=(128, 128)):
     '''

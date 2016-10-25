@@ -69,3 +69,5 @@ examples/UNet/*.png
 examples/UNet/readme.txt
 .gitignore~
 
+examples/UNet/adam*
+examples/UNet/nesterov*
