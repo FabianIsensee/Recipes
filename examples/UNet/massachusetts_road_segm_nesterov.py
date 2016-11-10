@@ -75,7 +75,7 @@ def main():
     N_EPOCHS = 50
     N_BATCHES_PER_EPOCH = 200
     PATCH_SIZE = 512
-    output_folder = "/home/fabian/PycharmProjects/Recipes/examples/UNet/nesterov/"
+    output_folder = "nesterov/"
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
 
@@ -86,16 +86,16 @@ def main():
     # (if you have, copy your repository including the data to an SSD, otherwise it will take a long time to
     # generate batches)
     mmap_mode = 'r'
-    data_train = np.load("/media/fabian/DeepLearningData/datasets/road_segm/data_train.npy", mmap_mode=mmap_mode)
-    target_train = np.load("/media/fabian/DeepLearningData/datasets/road_segm/target_train.npy", mmap_mode=mmap_mode)
-    data_valid = np.load("/media/fabian/DeepLearningData/datasets/road_segm/data_test.npy", mmap_mode=mmap_mode)
-    target_valid = np.load("/media/fabian/DeepLearningData/datasets/road_segm/target_test.npy", mmap_mode=mmap_mode)
-    data_test = np.load("/media/fabian/DeepLearningData/datasets/road_segm/data_valid.npy", mmap_mode=mmap_mode)
-    target_test = np.load("/media/fabian/DeepLearningData/datasets/road_segm/target_valid.npy", mmap_mode=mmap_mode)
+    data_train = np.load("data_train.npy", mmap_mode=mmap_mode)
+    target_train = np.load("target_train.npy", mmap_mode=mmap_mode)
+    data_valid = np.load("data_test.npy", mmap_mode=mmap_mode)
+    target_valid = np.load("target_test.npy", mmap_mode=mmap_mode)
+    data_test = np.load("data_valid.npy", mmap_mode=mmap_mode)
+    target_test = np.load("target_valid.npy", mmap_mode=mmap_mode)
 
     # we are using pad='same' for simplicity (otherwise we would have to crop our ground truth).
-    net = build_UNet(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
-                     nonlinearity=lasagne.nonlinearities.elu, input_dim=(PATCH_SIZE, PATCH_SIZE),
+    net = build_UNet_relu(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
+                     input_dim=(PATCH_SIZE, PATCH_SIZE),
                      base_n_filters=16, do_dropout=False)
     output_layer_for_loss = net["output_flattened"]
 
@@ -118,13 +118,13 @@ def main():
     # some data augmentation. If you want better results you should invest more effort here. I left rotations and
     # deformations out for the sake of speed and simplicity
     train_generator_base = BatchGen((data_train, target_train), BATCH_SIZE)
-    train_generator = segDataAugm.segmentation_random_crop_generator(train_generator_base, (int(np.ceil(PATCH_SIZE * 2**0.5)), int(np.ceil(PATCH_SIZE * 2**0.5))))
-    train_generator = segDataAugm.segmentation_rotation_generator(train_generator)
+    train_generator = segDataAugm.random_crop_generator(train_generator_base, (int(np.ceil(PATCH_SIZE * 2**0.5)), int(np.ceil(PATCH_SIZE * 2**0.5))))
+    train_generator = segDataAugm.rotation_generator(train_generator)
     # train_generator = segDataAugm.segmentation_elastric_transform_generator(train_generator, 950, 40)
-    train_generator = segDataAugm.segmentation_center_crop_generator(train_generator, PATCH_SIZE)
-    train_generator = segDataAugm.segmentation_mirror_axis_generator(train_generator)
-    train_generator = segDataAugm.segmentation_center_crop_seg_generator(train_generator, 324)
-    train_generator = multiThreadedGen.MultiThreadedGenerator(train_generator, 8, 10)
+    train_generator = segDataAugm.center_crop_generator(train_generator, PATCH_SIZE)
+    train_generator = segDataAugm.mirror_axis_generator(train_generator)
+    train_generator = segDataAugm.center_crop_seg_generator(train_generator, 324)
+    train_generator = multiThreadedGen.MultiThreadedGenerator(train_generator, 4, 10)
     train_generator._start()
 
     x_sym = T.tensor4()
@@ -155,7 +155,7 @@ def main():
     loss_val += l2_loss
     acc = T.mean(T.eq(T.argmax(prediction_test, axis=1), seg_sym), dtype=theano.config.floatX)
 
-    learning_rates = np.linspace(0.001, 0.00001, N_EPOCHS, dtype=np.float32)
+    learning_rates = np.linspace(0.008, 0.00001, N_EPOCHS, dtype=np.float32)
     momentums = np.linspace(0.9, 0.999, N_EPOCHS, dtype=np.float32)
     # learning rate has to be a shared variablebecause we decrease it with every epoch
     params = lasagne.layers.get_all_params(output_layer_for_loss, trainable=True)
@@ -214,7 +214,7 @@ def main():
             accuracies_val.append(acc)
             auc_val.append(roc_auc_score(target_flat, get_class_probas(data)[:, 1]))
         print "val accuracy: ", np.mean(accuracies_val), " val loss: ", np.mean(losses_val), " val AUC score: ", np.mean(auc_val)
-        if (epoch != 0) and (np.mean(losses_val) > 1.3 * val_loss_old):
+        if (epoch != 0) and (np.mean(losses_val) > 1.5 * val_loss_old):
             print "oops..."
             with open(output_folder + "UNet_params_ep%03.0f.pkl"%(epoch-1), 'r') as f:
                 params = cPickle.load(f)
@@ -229,7 +229,9 @@ def main():
                 cPickle.dump([all_training_accs, all_training_losses, all_validation_accs, all_validation_losses], f)
             # create some png files showing (raw image, ground truth, prediction). Of course we use the test set here ;-)
             test_gen = random_crop_generator(batch_generator(data_test, target_test, BATCH_SIZE), PATCH_SIZE)
-            plot_some_results(get_segmentation, test_gen, 30, output_folder + "road_segm")
+            if not os.path.isdir(output_folder + "ep%02.0d/"%epoch):
+                os.mkdir(output_folder + "ep%02.0d/"%epoch)
+            plot_some_results(get_segmentation, test_gen, 30, output_folder + output_folder + "ep%02.0d/"%epoch + "ep_%02.0d_road_segm"%epoch)
             epoch += 1
             all_training_accs.append(np.mean(accuracies_train))
             all_training_losses.append(np.mean(losses_train))

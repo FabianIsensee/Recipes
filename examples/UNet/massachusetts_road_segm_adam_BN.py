@@ -94,7 +94,7 @@ def main():
     target_test = np.load("target_valid.npy", mmap_mode=mmap_mode)
 
     # we are using pad='same' for simplicity (otherwise we would have to crop our ground truth).
-    net = build_UNet_relu(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
+    net = build_UNet_relu_BN(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
                      input_dim=(PATCH_SIZE, PATCH_SIZE),
                      base_n_filters=16, do_dropout=False)
     output_layer_for_loss = net["output_flattened"]
