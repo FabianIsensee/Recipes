@@ -124,7 +124,7 @@ def main():
     train_generator = segDataAugm.center_crop_generator(train_generator, PATCH_SIZE)
     train_generator = segDataAugm.mirror_axis_generator(train_generator)
     train_generator = segDataAugm.center_crop_seg_generator(train_generator, 324)
-    train_generator = multiThreadedGen.MultiThreadedGenerator(train_generator, 4, 10)
+    train_generator = multiThreadedGen.MultiThreadedGenerator(train_generator, 6, 10)
     train_generator._start()
 
     x_sym = T.tensor4()
@@ -232,7 +232,7 @@ def main():
             test_gen = random_crop_generator(batch_generator(data_test, target_test, BATCH_SIZE), PATCH_SIZE)
             if not os.path.isdir(output_folder + "ep%02.0d/"%epoch):
                 os.mkdir(output_folder + "ep%02.0d/"%epoch)
-            plot_some_results(get_segmentation, test_gen, 30, output_folder + output_folder + "ep%02.0d/"%epoch + "ep_%02.0d_road_segm"%epoch)
+            plot_some_results(get_segmentation, test_gen, 30, output_folder + "ep%02.0d/"%epoch + "ep_%02.0d_road_segm"%epoch)
             epoch += 1
             all_training_accs.append(np.mean(accuracies_train))
             all_training_losses.append(np.mean(losses_train))
