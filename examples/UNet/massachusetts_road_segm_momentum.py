@@ -67,7 +67,7 @@ def plot_learning_curve(train_accs, train_losses, val_accs, val_losses, fname):
 def main():
     # only download dataset once. This takes a while.
     # heuristic that I included to make sure the dataset is only donwloaded and prepared once
-    if not os.path.isfile("test_target.npy"):
+    if not os.path.isfile("target_test.npy"):
         prepare_dataset()
 
     # set some hyper parameters. You should not have to touch anything if you have 4GB or more VRAM
