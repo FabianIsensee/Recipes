@@ -108,6 +108,7 @@ def prepare_dataset():
         np.save("target_test.npy", target_test)
     except:
         print "something went wrong, maybe the download?"
+        print sys.exc_info()[0]
 
 if __name__ == "__main__":
     prepare_dataset()
