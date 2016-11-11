@@ -105,7 +105,7 @@ def main():
     class_frequencies = np.array([2374093357., 118906643.])
     # we are taking the log here because we want the net to focus more on the road pixels but not too much (otherwise
     # it would not be penalized enough for missclassifying terrain pixels which results in too many false positives)
-    class_weights = class_frequencies[[1,0]]**0.9
+    class_weights = class_frequencies[[1,0]]**1.0
     class_weights = class_weights / np.sum(class_weights) * 2.
     class_weights = class_weights.astype(np.float32)
 
