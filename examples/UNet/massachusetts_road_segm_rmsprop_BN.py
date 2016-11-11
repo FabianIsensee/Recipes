@@ -77,7 +77,7 @@ def main():
     N_EPOCHS = 50
     N_BATCHES_PER_EPOCH = 200
     PATCH_SIZE = 512
-    output_folder = "rmsprob/"
+    output_folder = "rmsprob_BN/"
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
 
