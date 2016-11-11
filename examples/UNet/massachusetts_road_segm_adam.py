@@ -1,5 +1,7 @@
 __author__ = 'Fabian Isensee'
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import lasagne
 import os
 import sys
