@@ -76,7 +76,7 @@ def main():
     BATCH_SIZE = 20
     N_EPOCHS = 50
     N_BATCHES_PER_EPOCH = 200
-    PATCH_SIZE = 512
+    PATCH_SIZE = 256
     output_folder = "adam_BN_32_base_filters/"
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
