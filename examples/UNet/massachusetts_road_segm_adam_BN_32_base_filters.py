@@ -73,10 +73,10 @@ def main():
         prepare_dataset()
 
     # set some hyper parameters. You should not have to touch anything if you have 4GB or more VRAM
-    BATCH_SIZE = 20
+    BATCH_SIZE = 10
     N_EPOCHS = 50
     N_BATCHES_PER_EPOCH = 200
-    PATCH_SIZE = 256
+    PATCH_SIZE = 512
     output_folder = "adam_BN_32_base_filters/"
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
