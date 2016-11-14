@@ -71,3 +71,11 @@ examples/UNet/readme.txt
 
 examples/UNet/adam*
 examples/UNet/nesterov*
+examples/UNet/adadelta_lower_lr*
+examples/UNet/momentum*
+examples/UNet/momentum_BN*
+examples/UNet/rmsprob_BN*
+examples/UNet/sgd_BN*
+examples/UNet/sgd*
+
+*~

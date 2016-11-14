@@ -87,7 +87,7 @@ def main():
     # read from disk the bits that we currently need
     # (if you have, copy your repository including the data to an SSD, otherwise it will take a long time to
     # generate batches)
-    mmap_mode = 'r'
+    mmap_mode = 'c'
     data_train = np.load("data_train.npy", mmap_mode=mmap_mode)
     target_train = np.load("target_train.npy", mmap_mode=mmap_mode)
     data_valid = np.load("data_test.npy", mmap_mode=mmap_mode)

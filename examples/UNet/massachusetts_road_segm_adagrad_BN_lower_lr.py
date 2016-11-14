@@ -77,7 +77,7 @@ def main():
     N_EPOCHS = 50
     N_BATCHES_PER_EPOCH = 200
     PATCH_SIZE = 512
-    output_folder = "nesterov/"
+    output_folder = "adagrad_BN_lower_lr/"
     if not os.path.isdir(output_folder):
         os.mkdir(output_folder)
 
@@ -96,7 +96,7 @@ def main():
     target_test = np.load("target_valid.npy", mmap_mode=mmap_mode)
 
     # we are using pad='same' for simplicity (otherwise we would have to crop our ground truth).
-    net = build_UNet_relu(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
+    net = build_UNet_relu_BN(n_input_channels=3, BATCH_SIZE=BATCH_SIZE, num_output_classes=2, pad='valid',
                      input_dim=(PATCH_SIZE, PATCH_SIZE),
                      base_n_filters=16, do_dropout=False)
     output_layer_for_loss = net["output_flattened"]
@@ -157,13 +157,14 @@ def main():
     loss_val += l2_loss
     acc = T.mean(T.eq(T.argmax(prediction_test, axis=1), seg_sym), dtype=theano.config.floatX)
 
-    learning_rates = np.linspace(0.008, 0.00001, N_EPOCHS, dtype=np.float32)
-    momentums = np.linspace(0.9, 0.999, N_EPOCHS, dtype=np.float32)
+    learning_rates = np.linspace(0.5, 0.0001, N_EPOCHS, dtype=np.float32)
+    # momentums = np.linspace(0.9, 0.999, N_EPOCHS, dtype=np.float32)
     # learning rate has to be a shared variablebecause we decrease it with every epoch
     params = lasagne.layers.get_all_params(output_layer_for_loss, trainable=True)
     learning_rate = theano.shared(learning_rates[0])
-    momentum = theano.shared(momentums[0])
-    updates = lasagne.updates.nesterov_momentum(loss, params, learning_rate=learning_rate, momentum=momentum)
+    # momentum = theano.shared(momentums[0])
+    # updates = lasagne.updates.nesterov_momentum(loss, params, learning_rate=learning_rate, momentum=momentum)
+    updates = lasagne.updates.adagrad(loss, params, learning_rate=learning_rate)
 
     # create a convenience function to get the segmentation
     seg_output = lasagne.layers.get_output(net["output_segmentation"], x_sym, deterministic=True)
@@ -184,7 +185,7 @@ def main():
     epoch = 0
     while epoch < N_EPOCHS:
         learning_rate.set_value(learning_rates[epoch])
-        momentum.set_value(momentums[epoch])
+        # momentum.set_value(momentums[epoch])
         print epoch
         losses_train = []
         n_batches = 0
