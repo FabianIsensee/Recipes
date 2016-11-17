@@ -110,5 +110,28 @@ def prepare_dataset():
         print "something went wrong, maybe the download?"
         print sys.exc_info()[0]
 
+
+def plot_layer_activations(layer, data, output_fname="../results/layerActivation.png"):
+    pred = lasagne.layers.get_output(layer, data).eval()
+    n_channels = pred.shape[1]
+    plt.figure(figsize=(12, 12))
+    plots_per_axis = int(np.ceil(np.sqrt(n_channels)))
+    for i in xrange(n_channels):
+        plt.subplot(plots_per_axis, plots_per_axis, i+1)
+        plt.axis('off')
+        plt.imshow(pred[0, i, :, :], cmap="gray", interpolation="nearest")
+    plt.savefig(output_fname)
+    plt.close()
+
+from lasagne.layers.dnn import Conv2DDNNLayer
+from lasagne.layers import Pool2DLayer, Upscale2DLayer, ConcatLayer, InputLayer, Deconv2DLayer, InverseLayer
+def plot_all_layer_activations(output_layer, data):
+    layers = lasagne.layers.get_all_layers(output_layer)
+    for id, layer in enumerate(layers):
+        if isinstance(layer, Conv2DDNNLayer) or isinstance(layer, Pool2DLayer) or isinstance(layer, Upscale2DLayer) or isinstance(layer, ConcatLayer) or isinstance(layer, InputLayer) or isinstance(layer, Deconv2DLayer) or isinstance(layer, InverseLayer):
+            plot_layer_activations(layer, data, "%03.0d-%s.png" % (id, layer))
+
+
 if __name__ == "__main__":
     prepare_dataset()
+
